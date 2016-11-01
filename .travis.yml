@@ -1,0 +1,23 @@
+matrix:
+  include:
+    - os: "linux"
+      env: NODE_VERSION="6.9.1"
+    - os: "linux"
+      env: NODE_VERSION="7.0.0"
+    - os: "osx"
+      env: NODE_VERSION="6.9.1"
+    - os: "osx"
+      env: NODE_VERSION="7.0.0"
+
+before_install:
+  - uname -a
+  - rm -rf ~/.nvm
+  - git clone https://github.com/creationix/nvm.git ~/.nvm
+  - source ~/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+
+install: echo "install"
+
+script:
+  - npm install
+  - npm run build
