@@ -1,6 +1,6 @@
 # Weather App Sample
 
-[![Build Status](https://travis-ci.org/watsonwork/watsonwork-sender.svg)](https://travis-ci.org/watsonwork/watsonwork-weather)
+[![Build Status](https://travis-ci.org/watsonwork/watsonwork-weather.svg)](https://travis-ci.org/watsonwork/watsonwork-weather)
 
 App built with node.js to query weather information (and perhaps in the future proactive provide weather alerts).
 
