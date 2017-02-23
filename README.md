@@ -11,15 +11,16 @@ The Watson Work platform provides **spaces** for people to exchange
 **messages** in conversations. This sample app shows the following
 aspects of a Watson Work cognitive application:
 
-* how to implement a Watson Work application using Node.js;
-* how to authenticate and obtain the OAuth token needed to make Watson Work
-API calls;
-* how to listen to a conversation and receive messages on a Webhook endpoint;
-* how to send messages back to the conversation;
-* how to use the Watson Conversation cognitive capabilities to understand
-natural language, identify domain specific user intents, recognize entities
-such as locations and cities for example, and determine application actions
-based on previously identified intents and entities;
+* how to implement a Watson Work application and use Watson Work APIs using
+Node.js;
+* how to authenticate and obtain an OAuth token, listen to a conversation
+in a space, receive messages on a Webhook endpoint, and send messages back
+to the conversation;
+* how to use the Watson Work Services and Watson Conversation cognitive
+capabilities to understand natural language, identify domain specific user
+intents, recognize entities such as locations and cities for example, and
+determine application actions based on previously identified intents and
+entities;
 * how to handle a multi-turn conversation and keep track of what's being
 said across multiple messages.
 
@@ -299,7 +300,7 @@ src/          - Javascript sources
 
 The app leverages the Watson Work Services and Watson Conversation
 cognitive capabilities to understand natural language intents, entities,
-and determine the necessary actions.
+and determine the necessary app actions.
 
 It uses the [Watson Work OAuth API]
 (https://workspace.ibm.com/developer/docs) to authenticate and get an
