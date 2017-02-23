@@ -103,6 +103,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
 
                   // Reset the weather action as it's now complete
                   delete astate.action;
+                  delete astate.city;
                   cb(null, astate);
                 });
               return;
@@ -127,6 +128,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
 
                   // Reset the weather action as it's now complete
                   delete astate.action;
+                  delete astate.city;
                   cb(null, astate);
                 });
               return;
