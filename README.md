@@ -3,13 +3,22 @@
 [![Build Status](https://travis-ci.org/watsonwork/watsonwork-weather.svg)](https://travis-ci.org/watsonwork/watsonwork-weather)
 
 A Node.js sample app that listens to messages posted to a space
-in IBM Watson Workspace and provides actions that return the weather.
+in IBM Watson Workspace and provides actions that return weather
+information.
 
 The Watson Work platform provides **spaces** for people to exchange
-**messages** in conversations. This app shows how to listen to a conversation
-and receive messages on a Webhook endpoint, then send response messages back
-to the conversation. It also demonstrates how to authenticate an application
-and obtain the OAuth token needed to make Watson Work API calls.
+**messages** in conversations. This app shows the following aspects of
+a Watson Work cognitive application:
+
+* how to authenticate an application and obtain the OAuth token needed to
+make Watson Work API calls.
+* how to listen to a conversation and receive messages on a Webhook endpoint;
+* how to send messages back to the conversation;
+* how to use Watson Conversation to understand a conversation, identify
+the user's intent, recognize entities like city names for example, and
+decide what actions the app should execute;
+* how to handle a multi-turn conversation and keep track of what's being
+said across multiple messages.
 
 ## Try it out
 
@@ -66,6 +75,27 @@ you're planning to run the sample app,
 to Bluemix.
 
 Save the app and write down its app id, app secret and Webhook secret.
+
+### Configuring the Watson Conversation service
+
+Go to your
+[Bluemix Dashboard](https://console.ng.bluemix.net/dashboard/cf-apps),
+(https://workspace.ibm.com/developer/apps) and create a Watson
+Conversation service.
+
+TODO: add detailed steps to configure Watson Conversation.
+
+TODO: add detailed steps to enable Watson Conversation in the Watson Work
+app.
+
+### Configuring the Weather Company Data service
+
+Go to your
+[Bluemix Dashboard](https://console.ng.bluemix.net/dashboard/cf-apps),
+(https://workspace.ibm.com/developer/apps) and create a Weather Company
+Data service.
+
+TODO: add detailed steps to configure the Weather Company Data service.
 
 ### Starting the app on Bluemix
 
