@@ -16,9 +16,10 @@ aspects of a Watson Work cognitive application:
 API calls;
 * how to listen to a conversation and receive messages on a Webhook endpoint;
 * how to send messages back to the conversation;
-* how to use Watson Conversation to understand the conversation, identify
-user intents, recognize entities like city names for example, and
-decide what actions the app should execute to help in the conversation;
+* how to use the Watson Conversation cognitive capabilities to understand
+natural language, identify domain specific user intents, recognize entities
+such as locations and cities for example, and determine application actions
+based on previously identified intents and entities;
 * how to handle a multi-turn conversation and keep track of what's being
 said across multiple messages.
 
@@ -296,12 +297,20 @@ src/          - Javascript sources
 
 ## What API does the app use?
 
-The app uses the [Watson Work OAuth API]
+The app leverages the Watson Work Services and Watson Conversation
+cognitive capabilities to understand natural language intents, entities,
+and determine the necessary actions.
+
+It uses the [Watson Work OAuth API]
 (https://workspace.ibm.com/developer/docs) to authenticate and get an
-OAuth token. It implements a Webhook endpoint according to the
+OAuth token.
+
+It implements a Webhook endpoint according to the
 [Watson Work Webhook API](https://workspace.ibm.com/developer/docs) to
 listen to conversations in a space and receive messages and message
-annotations. Finally, it uses the [Watson Work Spaces API]
+annotations.
+
+Finally, it uses the [Watson Work Spaces API]
 (https://workspace.ibm.com/developer/docs) to send back weather information
 messages to the space.
 
