@@ -28,8 +28,8 @@ To try the sample app do the following:
 
 ### Deploying the app to IBM Bluemix
 
-If you have a [Bluemix](https://bluemix.net)  account and want to give the
-sample app a quick try, you can simply get it deployed to Bluemix straight
+If you want to give the sample app a quick try using [Bluemix]
+(https://bluemix.net), you can simply get it deployed to Bluemix straight
 from Github without even having to download it to your local development
 environment and build it yourself. Just click the button below:
 
@@ -63,6 +63,40 @@ cd watsonwork-weather
 npm run build
 ```
 
+### Configuring the Bluemix Watson Conversation service
+
+The sample Weather app uses Watson Conversation to understand natural
+language and provide a natural language conversational interface, so
+you need to configure a Watson Conversation Bluemix service for it.
+
+Go to the
+[Bluemix Watson Dashboard](https://console.ng.bluemix.net/dashboard/watson)
+and create a Watson Conversation service.
+
+Note the Watson Conversation service user name and password, as you will
+need to configure the Weather app with them.
+
+From the Watson Conversation service page click **Launch tool** to open
+the Watson Conversation tooling, and import **watson.json** into a new
+Watson Conversation workspace.
+
+Note the Watson Conversation workspace id, as you will need to configure the
+Weather app with it.
+
+### Configuring the Weather Company Data service
+
+The sample Weather app uses the Weather Company Data API to retrieve
+weather information, so you need to configure a Weather Company Data
+Bluemix service for it.
+
+Go to the
+[Bluemix Data & Analytics Dashboard]
+(https://console.ng.bluemix.net/catalog/?category=data) and create a Weather
+Company Data service.
+
+Note the Weather Company Data service user name and password, as you will
+need to configure the Weather app with them.
+
 ### Registering the app with Watson Work
 
 In your Web browser, go to [Watson Work Services / Apps]
@@ -76,28 +110,10 @@ you're planning to run the sample app,
 `https://<bluemix app name>.mybluemix.net/weather` if you've deployed it
 to Bluemix.
 
+Configure the **Make It Cognitive** section of the app to use your Watson
+Conversation workspace, user and password.
+
 Save the app and write down its app id, app secret and Webhook secret.
-
-### Configuring the Watson Conversation service
-
-Go to your
-[Bluemix Dashboard](https://console.ng.bluemix.net/dashboard/cf-apps),
-(https://workspace.ibm.com/developer/apps) and create a Watson
-Conversation service.
-
-TODO: add detailed steps to configure Watson Conversation.
-
-TODO: add detailed steps to enable Watson Conversation in the Watson Work
-app.
-
-### Configuring the Weather Company Data service
-
-Go to your
-[Bluemix Dashboard](https://console.ng.bluemix.net/dashboard/cf-apps),
-(https://workspace.ibm.com/developer/apps) and create a Weather Company
-Data service.
-
-TODO: add detailed steps to configure the Weather Company Data service.
 
 ### Starting the app on Bluemix
 
@@ -284,9 +300,10 @@ The app uses the [Watson Work OAuth API]
 (https://workspace.ibm.com/developer/docs) to authenticate and get an
 OAuth token. It implements a Webhook endpoint according to the
 [Watson Work Webhook API](https://workspace.ibm.com/developer/docs) to
-listen to conversations in a space and receive messages. Finally, it uses
-the [Watson Work Spaces API] (https://workspace.ibm.com/developer/docs) to
-send back weather information messages to the space.
+listen to conversations in a space and receive messages and message
+annotations. Finally, it uses the [Watson Work Spaces API]
+(https://workspace.ibm.com/developer/docs) to send back weather information
+messages to the space.
 
 ## How can I contribute?
 
