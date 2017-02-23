@@ -1,0 +1,44 @@
+#!/bin/bash
+
+set -e
+
+# Download the CF CLI
+if [ ! -x .cf/cf ]; then
+  UNAME=$(uname)
+  if [ "$UNAME" == "Darwin" ]; then
+    (cd .cf && curl -L "https://cli.run.pivotal.io/stable?release=macosx64-binary&source=github" | tar -zx)
+  else
+    (cd .cf && curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar -zx)
+  fi
+fi
+
+# Login
+if [ "$CF_LOGIN" != "" ]; then
+  .cf/cf api --skip-ssl-validation $CF_API
+  .cf/cf login -u $CF_USER -p $CF_PASSWORD -o $CF_ORG -s $CF_SPACE
+fi
+
+# Start clean
+if [ "$APP" == "" ]; then
+  echo "Environment variable APP must be set to Bluemix app name"
+  exit
+fi
+
+.cf/cf delete -f $APP
+rm -f .cf/app.zip
+
+# Pack and stage the app
+zip -r .cf/app.zip package.json .npmrc src lib
+.cf/cf push --no-start $APP -p .cf/app.zip
+
+# Set app environment
+.cf/cf set-env $APP DEBUG "watsonwork-*"
+.cf/cf set-env $APP WEATHER_APP_ID "$WEATHER_APP_ID"
+.cf/cf set-env $APP WEATHER_APP_SECRET "$WEATHER_APP_SECRET"
+.cf/cf set-env $APP WEATHER_WEBHOOK_SECRET "$WEATHER_WEBHOOK_SECRET"
+.cf/cf set-env $APP WEATHER_TWC_USER "$WEATHER_TWC_USER"
+.cf/cf set-env $APP WEATHER_TWC_PASSWORD "$WEATHER_TWC_PASSWORD"
+
+
+# Start the app
+.cf/cf start $APP
