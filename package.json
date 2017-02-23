@@ -1,32 +1,59 @@
 {
-  "name": "weather",
-  "version": "1.0.1",
-  "description": "IBM Watson Workspace Weather app",
-  "main": "lib/app.js",
-  "scripts": {
-    "start": "node lib/app.js",
-    "babel": "babel app.js --out-dir lib",
-    "build": "npm run babel"
-  },
-  "author": "Luis Benitez",
+  "name": "watsonwork-weather",
+  "description": "A sample app that listens to messages posted to a space in IBM Watson Workspace and implements actions that return the weather",
   "license": "Apache-2.0",
-  "dependencies": {
-    "babel-preset-es2015": "^6.6.0",
-    "babel-cli": "^6.10.1",
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
-    "node-weatherunderground": "^1.2.0",
-    "request": "^2.76.0",
-    "zipcode": "^0.1.1"
-  },
-  "devDependencies": {
+  "version": "0.0.1",
+  "homepage": "https://github.com/watsonwork/watsonwork-weather",
+  "bugs": {
+    "url": "https://github.com/watsonwork/watsonwork-weather"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/watsonwork/watsonwork-weather"
+    "url": "https://github.com/watsonwork/watsonwork-weather.git"
+  },
+  "keywords": [
+    "watson",
+    "work",
+    "sample",
+    "weather"
+  ],
+  "files": [
+    ".npmrc",
+    "lib/",
+    "src/"
+  ],
+  "main": "lib/app.js",
+  "bin": {
+    "weather": "lib/app.js"
+  },
+  "scripts": {
+    "start": "node lib/app.js",
+    "babel": "babel src --out-dir lib",
+    "test": "mocha lib/test",
+    "lint": "eslint src",
+    "clean": "rm -rf lib node_modules",
+    "build": "npm install && npm run babel && npm run lint && npm test",
+    "rebuild": "npm run clean && npm run build",
+    "cibuild": "npm run build"
+  },
+  "dependencies": {
+    "babel-preset-es2015": "^6.6.0",
+    "body-parser": "^1.15.2",
+    "debug": "^2.2.0",
+    "express": "^4.14.0",
+    "jsonwebtoken": "^7.1.9",
+    "memdown": "^1.2.4",
+    "pouchdb-node": "^6.1.2",
+    "request": "^2.73.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "chai": "^3.5.0",
+    "eslint": "^3.3.0",
+    "mocha": "^2.5.3"
   },
   "engines": {
-    "node": ">=5.11.1",
-    "npm": ">=3.8.6"
+    "node": ">=6.9.1",
+    "npm": ">=3.10.8"
   }
 }

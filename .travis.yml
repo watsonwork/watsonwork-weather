@@ -19,5 +19,5 @@ before_install:
 install: echo "install"
 
 script:
-  - npm install
-  - npm run build
+  - npm run cibuild
+
