@@ -2,21 +2,23 @@
 
 [![Build Status](https://travis-ci.org/watsonwork/watsonwork-weather.svg)](https://travis-ci.org/watsonwork/watsonwork-weather)
 
-A Node.js sample app that listens to messages posted to a space
-in IBM Watson Workspace and provides actions that return weather
-information.
+A sample Watson Work cognitive app that listens to messages posted to a
+space in IBM Watson Workspace, understands the natural language conversation
+happening in the space and posts helpful weather information as needed in
+the conversation.
 
 The Watson Work platform provides **spaces** for people to exchange
-**messages** in conversations. This app shows the following aspects of
-a Watson Work cognitive application:
+**messages** in conversations. This sample app shows the following
+aspects of a Watson Work cognitive application:
 
-* how to authenticate an application and obtain the OAuth token needed to
-make Watson Work API calls.
+* how to implement a Watson Work application using Node.js;
+* how to authenticate and obtain the OAuth token needed to make Watson Work
+API calls;
 * how to listen to a conversation and receive messages on a Webhook endpoint;
 * how to send messages back to the conversation;
-* how to use Watson Conversation to understand a conversation, identify
-the user's intent, recognize entities like city names for example, and
-decide what actions the app should execute;
+* how to use Watson Conversation to understand the conversation, identify
+user intents, recognize entities like city names for example, and
+decide what actions the app should execute to help in the conversation;
 * how to handle a multi-turn conversation and keep track of what's being
 said across multiple messages.
 
