@@ -29,7 +29,7 @@ rm -f .cf/app.zip
 
 # Pack and stage the app
 zip -r .cf/app.zip package.json .npmrc src lib
-.cf/cf push --no-start $APP -p .cf/app.zip
+.cf/cf push --no-start $APP -m 256M -p .cf/app.zip
 
 # Set app environment
 .cf/cf set-env $APP DEBUG "watsonwork-*"
