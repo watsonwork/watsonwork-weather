@@ -302,18 +302,16 @@ The app leverages the Watson Work Services and Watson Conversation
 cognitive capabilities to understand natural language intents, entities,
 and determine the necessary app actions.
 
-It uses the [Watson Work OAuth API]
-(https://workspace.ibm.com/developer/docs) to authenticate and get an
-OAuth token.
+It uses the [Watson Work OAuth API](https://workspace.ibm.com/developer/docs)
+to authenticate and get an OAuth token.
 
 It implements a Webhook endpoint according to the
 [Watson Work Webhook API](https://workspace.ibm.com/developer/docs) to
 listen to conversations in a space and receive messages and message
 annotations.
 
-Finally, it uses the [Watson Work Spaces API]
-(https://workspace.ibm.com/developer/docs) to send back weather information
-messages to the space.
+Finally, it uses the [Watson Work Spaces API](https://workspace.ibm.com/developer/docs)
+to send back weather information messages to the space.
 
 ## How can I contribute?
 
