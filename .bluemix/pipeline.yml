@@ -34,4 +34,4 @@ stages:
       application: ${CF_APP}
     script: |-
       #!/bin/bash
-      cf push --no-start "${CF_APP}"
+      cf push --no-start -m 256M "${CF_APP}"
