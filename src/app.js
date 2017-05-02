@@ -1,6 +1,16 @@
 // A sample app that listens to messages posted to a space in IBM
 // Watson Workspace and implements actions that return the weather.
 
+/*
+
+export WEATHER_APP_ID=679ef41f-7533-40c2-84f9-eb0d30f02e99
+export WEATHER_APP_SECRET=8j8aej9a4pjmzgia30q0q6ai3stl3cyy
+export WEATHER_WEBHOOK_SECRET=5mq42xeycn8kbcfsauggqsmyxfw3knh3
+export WEATHER_TWC_USER=9d69c6ca-e4d2-4273-b715-c350337b26f7
+export WEATHER_TWC_PASSWORD=iTt1hAGQlH
+
+
+*/
 import express from 'express';
 import * as util from 'util';
 import * as bparser from 'body-parser';
@@ -37,122 +47,123 @@ export const weather = (appId, store, wuser, wpassword, token) =>
     // be sent asynchronously
     res.status(201).end();
 
-    // Handle messages identified as action requests
-    events.onAction(req.body, appId, token,
-      (action, focus, message, user) => {
-
-        // Run with any previously saved action state
-        state.run(spaceId, user.id, store, (astate, cb) => {
-
-          // Remember the action being requested and the message that
-          // requested it
-          astate.message = message;
-          astate.action = action;
-
-          // Look for a city in the request, default to last city used
-          const city =
-            cityAndState(focus.extractedInfo.entities) || astate.city;
-
-          if(city) {
-            // Remember the city
-            astate.city = city;
-
-            // Ask the user to confirm
-            if(action === 'Get_Weather_Conditions')
-              send(confirmConditions(city, user));
-
-            else if(action === 'Get_Weather_Forecast')
-              send(confirmForecast(city, user));
-          }
-          else
-            // Need a city, ask for it
-            send(whichCity(user));
-
-          // Return the new action state
-          cb(null, astate);
-        });
-      });
-
-    // Handle steps within an action, determined from user input
-    events.onActionNextStep(req.body, appId, token,
-      (next, focus, message, user) => {
-
-        // Run with any previously saved action state
-        state.run(spaceId, user.id, store, (astate, cb) => {
-
-          // Proceed with the action and send the weather conditions or a
-          // weather forecast
-          if(next === 'Proceed' && astate.city) {
-
-            if(astate.action === 'Get_Weather_Conditions') {
-              // Get the weather conditions
-              twc.conditions(astate.city,
-                wuser, wpassword, (err, conditions) => {
-                  if(err) {
-                    send(weatherError());
-                    return;
-                  }
-                  if(!conditions.geo && conditions.geo.city) {
-                    // Tell the user that the given city couldn't be found
-                    send(cityNotFound(astate.city, user));
-                    return;
-                  }
-
-                  // Return the weather conditions
-                  send(weatherConditions(conditions, user));
-
-                  // Reset the weather action as it's now complete
-                  delete astate.action;
-                  delete astate.city;
-                  cb(null, astate);
-                });
-              return;
-            }
-
-            if(astate.action === 'Get_Weather_Forecast') {
-              // Get a weather forecast
-              twc.forecast5d(astate.city,
-                wuser, wpassword, (err, forecast) => {
-                  if(err) {
-                    send(weatherError());
-                    return;
-                  }
-                  if(!forecast.geo && forecast.geo.city) {
-                    // Tell the user that the given city couldn't be found
-                    send(cityNotFound(astate.city, user));
-                    return;
-                  }
-
-                  // Return weather forecast
-                  send(weatherForecast(forecast, user));
-
-                  // Reset the weather action as it's now complete
-                  delete astate.action;
-                  delete astate.city;
-                  cb(null, astate);
-                });
-              return;
-            }
-          }
-
-          // Cancel the action
-          if((astate.action === 'Get_Weather_Conditions' ||
-            astate.action === 'Get_Weather_Forecast') &&
-            next === 'Cancel') {
-            send(noProblem(user));
-
-            // Forget the weather action and city as that was not what the
-            // user wanted
-            delete astate.action;
-            delete astate.city;
-            cb(null, astate);
-          }
-        });
-      });
+    // // Handle messages identified as action requests
+    // events.onAction(req.body, appId, token,
+    //   (action, focus, message, user) => {
+    //
+    //     // Run with any previously saved action state
+    //     state.run(spaceId, user.id, store, (astate, cb) => {
+    //
+    //       // Remember the action being requested and the message that
+    //       // requested it
+    //       astate.message = message;
+    //       astate.action = action;
+    //
+    //       // Look for a city in the request, default to last city used
+    //       const city =
+    //         cityAndState(focus.extractedInfo.entities) || astate.city;
+    //
+    //       if(city) {
+    //         // Remember the city
+    //         astate.city = city;
+    //
+    //         // Ask the user to confirm
+    //         if(action === 'Get_Weather_Conditions')
+    //           send(confirmConditions(city, user));
+    //
+    //         else if(action === 'Get_Weather_Forecast')
+    //           send(confirmForecast(city, user));
+    //       }
+    //       else
+    //         // Need a city, ask for it
+    //         send(whichCity(user));
+    //
+    //       // Return the new action state
+    //       cb(null, astate);
+    //     });
+    //   });
+    //
+    // // Handle steps within an action, determined from user input
+    // events.onActionNextStep(req.body, appId, token,
+    //   (next, focus, message, user) => {
+    //
+    //     // Run with any previously saved action state
+    //     state.run(spaceId, user.id, store, (astate, cb) => {
+    //
+    //       // Proceed with the action and send the weather conditions or a
+    //       // weather forecast
+    //       if(next === 'Proceed' && astate.city) {
+    //
+    //         if(astate.action === 'Get_Weather_Conditions') {
+    //           // Get the weather conditions
+    //           twc.conditions(astate.city,
+    //             wuser, wpassword, (err, conditions) => {
+    //               if(err) {
+    //                 send(weatherError());
+    //                 return;
+    //               }
+    //               if(!conditions.geo && conditions.geo.city) {
+    //                 // Tell the user that the given city couldn't be found
+    //                 send(cityNotFound(astate.city, user));
+    //                 return;
+    //               }
+    //
+    //               // Return the weather conditions
+    //               send(weatherConditions(conditions, user));
+    //
+    //               // Reset the weather action as it's now complete
+    //               delete astate.action;
+    //               delete astate.city;
+    //               cb(null, astate);
+    //             });
+    //           return;
+    //         }
+    //
+    //         if(astate.action === 'Get_Weather_Forecast') {
+    //           // Get a weather forecast
+    //           twc.forecast5d(astate.city,
+    //             wuser, wpassword, (err, forecast) => {
+    //               if(err) {
+    //                 send(weatherError());
+    //                 return;
+    //               }
+    //               if(!forecast.geo && forecast.geo.city) {
+    //                 // Tell the user that the given city couldn't be found
+    //                 send(cityNotFound(astate.city, user));
+    //                 return;
+    //               }
+    //
+    //               // Return weather forecast
+    //               send(weatherForecast(forecast, user));
+    //
+    //               // Reset the weather action as it's now complete
+    //               delete astate.action;
+    //               delete astate.city;
+    //               cb(null, astate);
+    //             });
+    //           return;
+    //         }
+    //       }
+    //
+    //       // Cancel the action
+    //       if((astate.action === 'Get_Weather_Conditions' ||
+    //         astate.action === 'Get_Weather_Forecast') &&
+    //         next === 'Cancel') {
+    //         send(noProblem(user));
+    //
+    //         // Forget the weather action and city as that was not what the
+    //         // user wanted
+    //         delete astate.action;
+    //         delete astate.city;
+    //         cb(null, astate);
+    //       }
+    //     });
+    //   });
 
     // Handle mentions of entities in messages
-    events.onEntities(req.body, appId, token,
+    events.onAnnotation(req.body, appId, token,
       (entities, nlp, message, user) => {
+        //log('Intent identified: %o', nlp.lens);
 
         // Run with any previously saved action state
         state.run(spaceId, user.id, store, (astate, cb) => {
@@ -326,4 +337,3 @@ if (require.main === module)
     }
     log('App started');
   });
-

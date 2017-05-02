@@ -48,4 +48,3 @@ export const run = (spaceId, userId, store, fn, cb) => {
     });
   });
 };
-
