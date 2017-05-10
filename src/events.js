@@ -22,7 +22,7 @@ const callback = (evt, appId, info, annotation, token, cb) => {
 
         // Return the extracted info, annotation, annotated message
         // and the user who sent it
-        log('Message %s',
+    log('Message %s',
           util.inspect(message, { colors: debug.useColors(), depth: 10 }));
     cb(info, annotation, message, message.createdBy);
   });
@@ -30,7 +30,8 @@ const callback = (evt, appId, info, annotation, token, cb) => {
 
 // Return the action identified in an annotation event
 export const onIntent = (evt, appId, token, cb) => {
-  log('Annotation event!');
+  // log('Annotation event!');
+  log(evt);
   // Check for a focus annotation
   if(evt.type === 'message-annotation-added' &&
     evt.annotationType === 'message-focus') {
@@ -47,8 +48,6 @@ export const onIntent = (evt, appId, token, cb) => {
   }
 };
 
-
-
 // Return the entities recognized in an annotation event
 export const onEntities = (evt, appId, token, cb) => {
   // Check for an entities annotation
@@ -62,32 +61,3 @@ export const onEntities = (evt, appId, token, cb) => {
     }
   }
 };
-// // Return the intent recognized in an annotation event
-// export const onAnnotation = (evt, appId, token, cb) => {
-//
-//     // Check for an entities annotation
-//     // if(evt.type === 'message-annotation-added' &&
-//     //   evt.annotationType === 'message-nlp-entities') {
-//     //
-//     //   // Call back with any recognized entities
-//     //   const nlp = JSON.parse(evt.annotationPayload);
-//     //   if(nlp.entities.length) {
-//     //   //  log('Idenfified entities %o', nlp.entities);
-//     //     callback(evt, appId, nlp.entities, nlp, token, cb);
-//     //   }
-//     // }
-//
-//     // intent identified
-//     if (evt.type === 'message-annotation-added') {
-//       const nlp = JSON.parse(evt.annotationPayload);
-//         if (evt.userId === 'toscana-service-watson-conversation-client-id') {
-//             callback(evt, appId, nlp.entities, nlp, token, cb);
-//         }
-//         // else {
-//           log(evt);
-//           log('_____________________________');
-//         // }
-//     }
-//
-//
-// };

@@ -19,8 +19,7 @@ to the conversation;
 * how to use the Watson Work Services and Watson Conversation cognitive
 capabilities to understand natural language, identify domain specific user
 intents, recognize entities such as locations and cities for example, and
-determine application actions based on previously identified intents and
-entities;
+act based on previously identified intents and entities;
 * how to handle a multi-turn conversation and keep track of what's being
 said across multiple messages.
 
@@ -300,7 +299,7 @@ src/          - Javascript sources
 
 The app leverages the Watson Work Services and Watson Conversation
 cognitive capabilities to understand natural language intents, entities,
-and determine the necessary app actions.
+and act based on previous and current entities and intents.
 
 It uses the [Watson Work OAuth API](https://workspace.ibm.com/developer/docs)
 to authenticate and get an OAuth token.

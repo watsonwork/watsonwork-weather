@@ -41,22 +41,26 @@ export const weather = (appId, store, wuser, wpassword, token) =>
   const send = (message) => {
     messages.send(spaceId,
       message.title, message.text, message.actor, token());
-    };
+  };
 
     // Respond to the Webhook right away, as any response messages will
     // be sent asynchronously
-    res.status(201).end();
+  res.status(201).end();
 
     // Handle messages identified as intents identified
-    events.onIntent(req.body, appId, token,
+  events.onIntent(req.body, appId, token,
       (action, focus, message, user) => {
 
         // Run with any previously saved action state
         state.run(spaceId, user.id, store, (astate, cb) => {
 
-          // User confirms, send the weather conditions
-          if (focus.lens === 'confirmation' && astate.city) {
+          // focus.lens is the current identified intent
+          // astate.intent is the previously stated intent prior to this current
+          // state frame
 
+          // User confirms, and has already set a city of interest
+          if (focus.lens === 'confirmation' && astate.city) {
+            // User has previously stated interest in the weather
             if (astate.intent === 'weather') {
               // Get the weather conditions
               twc.conditions(astate.city,
@@ -79,12 +83,12 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                   delete astate.city;
                   cb(null, astate);
                 });
-                return;
-              }
-
-              if (astate.intent === 'forecast') {
+              return;
+            }
+            // User has previously stated interest in the forecast
+            if (astate.intent === 'forecast') {
                 // Get a weather forecast
-                twc.forecast5d(astate.city,
+              twc.forecast5d(astate.city,
                   wuser, wpassword, (err, forecast) => {
                     if (err) {
                       send(weatherError());
@@ -104,54 +108,55 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                     delete astate.city;
                     cb(null, astate);
                   });
-                  return;
-                }
-              }
+              return;
+            }
+          }
 
               // Cancel the action
-              if ((astate.intent === 'weather' ||
+          if ((astate.intent === 'weather' ||
               astate.intent === 'forecast') &&
               focus.lens === 'negation') {
-                send(noProblem(user));
+            send(noProblem(user));
 
                 // Forget the weather action and city as that was not what the
                 // user wanted
-                delete astate.action;
-                delete astate.city;
-                cb(null, astate);
-              }
+            delete astate.action;
+            delete astate.city;
+            cb(null, astate);
+          }
               // Remember the action being requested and the message that
               // requested it
-              astate.message = message;
-              astate.intent = focus.lens;
+          astate.message = message;
+          astate.intent = focus.lens;
 
               // Look for a city in the request, default to last city used
-              const city =
+          const city =
               cityAndState(focus.extractedInfo.entities) || astate.city;
 
-              if (city) {
+          // set city
+          if (city) {
                 // Remember the city
-                astate.city = city;
+            astate.city = city;
 
-                // Ask the user to confirm
-                if (focus.lens === 'weather')
-                send(confirmConditions(city, user));
+            // Ask the user to confirm
+            if (focus.lens === 'weather')
+              send(confirmConditions(city, user));
 
-                else if (focus.lens === 'forecast')
-                send(confirmForecast(city, user));
-              }
-              else
+            else if (focus.lens === 'forecast')
+              send(confirmForecast(city, user));
+          }
+          else
               // Need a city, ask for it
               send(whichCity(user));
 
               // Return the new action state
-              cb(null, astate);
-            });
-          });
+          cb(null, astate);
+        });
+      });
 
 
           // Handle mentions of entities in messages
-          events.onEntities(req.body, appId, token,
+  events.onEntities(req.body, appId, token,
             (entities, nlp, message, user) => {
 
               // Run with any previously saved action state
@@ -165,92 +170,93 @@ export const weather = (appId, store, wuser, wpassword, token) =>
 
                   // Ask for a confirmation to get the weather conditions or
                   // weather forecast in the recognized city
-                  if (astate.intent === 'weather')
-                  send(confirmConditions(city, user));
+                    if (astate.intent === 'weather')
+                      send(confirmConditions(city, user));
 
-                  else if (astate.intent === 'forecast')
-                  send(confirmForecast(city, user));
+                    else if (astate.intent === 'forecast')
+                      send(confirmForecast(city, user));
                 }
 
                 // Return the new action state
                 cb(null, astate);
               });
             });
-          };
+};
 
           // Extract and combine city and state from a list of NL entities
-          const cityAndState = (entities) => {
-            const city =
+const cityAndState = (entities) => {
+  const city =
             (entities.filter((e) => e.type === 'City')[0] || {}).text;
-            if (!city)
-            return undefined;
-            const state =
+  if (!city)
+    return undefined;
+  const state =
             (entities.filter((e) => e.type === 'StateOrCounty')[0] || {}).text;
-            return state ? [city, state].join(', ') : city;
-          };
+  return state ? [city, state].join(', ') : city;
+};
 
           // The various messages the application sends
 
           // Weather conditions
-          const weatherConditions = (w, user) => ({
-            title: 'Weather Conditions',
-            text: util.format('%s\n%sF Feels like %sF\n%s%s', [w.geo.city, w.geo.adminDistrictCode].join(', '),
+const weatherConditions = (w, user) => ({
+  title: 'Weather Conditions',
+  text: util.format('%s\n%sF Feels like %sF\n%s%s',
+  [w.geo.city, w.geo.adminDistrictCode].join(', '),
             w.observation.temp,
             w.observation.feels_like,
             w.observation.wx_phrase,
             w.observation.terse_phrase ?
             '. ' + w.observation.terse_phrase : ''),
-            actor: 'The Weather Company'
-          });
+  actor: 'The Weather Company'
+});
 
           // Weather forecast
-          const weatherForecast = (w, user) => ({
-            title: 'Weather Forecast',
-            text: util.format('%s%s', [w.geo.city, w.geo.adminDistrictCode].join(', '),
+const weatherForecast = (w, user) => ({
+  title: 'Weather Forecast',
+  text: util.format('%s%s', [w.geo.city, w.geo.adminDistrictCode].join(', '),
             w.forecasts.reduce((a, f) => a +
             util.format('\n%s %sF %sF %s',
             f.dow.slice(0, 3),
             f.max_temp || '--', f.min_temp || '--',
             f.narrative.split('.')[0]),
             '')),
-            actor: 'The Weather Company'
-          });
+  actor: 'The Weather Company'
+});
 
           // Ask for a confirmation to get the weather conditions
-          const confirmConditions = (city, user) => ({
-            text: util.format(
+const confirmConditions = (city, user) => ({
+  text: util.format(
               'Hey %s, I think you\'re looking for the weather conditions ' +
               'in %s.\nIs that correct?', user.displayName, city)
-            });
+});
 
             // Ask for a confirmation to get a weather forecast
-            const confirmForecast = (city, user) => ({
-              text: util.format(
-                'Hey %s, I think you\'re looking for a weather forecast in %s.\n' +
-                'Is that correct?', user.displayName, city)
-              });
+const confirmForecast = (city, user) => ({
+  text: util.format(
+                'Hey %s, I think you\'re looking for a weather forecast in %s.'
+                + '\nIs that correct?', user.displayName, city)
+});
 
               // Ask which city to get weather for
-              const whichCity = (user) => ({
-                text: util.format(
+const whichCity = (user) => ({
+  text: util.format(
                   'Hey %s, I can get the weather for you but I need a city name.\nYou can ' +
                   'say San Francisco, or Littleton, MA for example.', user.displayName)
-                });
+});
 
                 // Ask to clarify a city that cannot be found
-                const cityNotFound = (city, user) => ({
-                  text: util.format(
+const cityNotFound = (city, user) => ({
+  text: util.format(
                     'Hey %s, I couldn\'t find %s, I need a valid city.',
                     user.displayName, city)
-                  });
+});
 
                   // Say OK
-                  const noProblem = (user) => ({
-                    text: util.format('OK %s, no problem.', user.displayName)
-                  });
+const noProblem = (user) => ({
+  text: util.format('OK %s, no problem.', user.displayName)
+});
 
                   // Create Express Web app
-                  export const webapp =
+export const webapp =
                   (appId, secret, whsecret, store, wuser, wpassword, cb) => {
                     // Authenticate the app and get an OAuth token
                     oauth.run(appId, secret, (err, token) => {
@@ -280,9 +286,9 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                   };
 
                   // App main entry point
-                  const main = (argv, env, cb) => {
+const main = (argv, env, cb) => {
                     // Create Express Web app
-                    webapp(
+  webapp(
                       env.WEATHER_APP_ID,
                       env.WEATHER_APP_SECRET,
                       env.WEATHER_WEBHOOK_SECRET,
@@ -313,13 +319,13 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                           https.createServer(conf, app).listen(port, cb);
                         });
                       });
-                    };
+};
 
-                    if (require.main === module)
-                    main(process.argv, process.env, (err) => {
-                      if (err) {
-                        console.log('Error starting app:', err);
-                        return;
-                      }
-                      log('App started');
-                    });
+if (require.main === module)
+  main(process.argv, process.env, (err) => {
+    if (err) {
+      console.log('Error starting app:', err);
+      return;
+    }
+    log('App started');
+  });
