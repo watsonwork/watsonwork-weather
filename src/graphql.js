@@ -10,7 +10,7 @@ const log = debug('watsonwork-weather-graphql');
 
 // Run the given GraphQL query
 export const query = (q, token, cb) => {
-  // log('Running query %s', q);
+  log('Running query %s', q);
   request.post('https://api.watsonwork.ibm.com/graphql', {
     headers: {
       jwt: token,
@@ -26,7 +26,7 @@ export const query = (q, token, cb) => {
       return;
     }
 
-    // log('GraphQL response code %d', val.statusCode);
+    log('GraphQL response code %d', val.statusCode);
     if(val.statusCode != 200) {
       // GraphQL service error
       cb({
@@ -58,8 +58,8 @@ export const query = (q, token, cb) => {
       return;
     }
 
-    // log('GraphQL response body %s',
-    //   util.inspect(body, { colors: debug.useColors(), depth: 10 }));
+    log('GraphQL response body %s',
+      util.inspect(body, { colors: debug.useColors(), depth: 10 }));
     cb(null, body);
   });
 };

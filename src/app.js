@@ -239,8 +239,8 @@ const confirmForecast = (city, user) => ({
               // Ask which city to get weather for
 const whichCity = (user) => ({
   text: util.format(
-                  'Hey %s, I can get the weather for you but I need a city name.\nYou can ' +
-                  'say San Francisco, or Littleton, MA for example.', user.displayName)
+  'Hey %s, I can get the weather for you but I need a city name.\nYou can ' +
+  'say San Francisco, or Littleton, MA for example.', user.displayName)
 });
 
                 // Ask to clarify a city that cannot be found
@@ -271,7 +271,8 @@ export const webapp =
                       // Configure Express route for the app Webhook
                       .post('/weather',
 
-                      // Verify Watson Work request signature and parse request body
+                      // Verify Watson Work request signature
+                      // and parse request body
                       bparser.json({
                         type: '*/*',
                         verify: sign.verify(whsecret)
@@ -281,7 +282,8 @@ export const webapp =
                       sign.challenge(whsecret),
 
                       // Handle Watson Work Webhook events
-                      weather(appId, state.store(store), wuser, wpassword, token)));
+                      weather(appId, state.store(store),
+                      wuser, wpassword, token)));
                     });
                   };
 
@@ -301,9 +303,10 @@ const main = (argv, env, cb) => {
                         }
 
                         if (env.PORT) {
-                          // In a hosting environment like Bluemix for example, HTTPS is
-                          // handled by a reverse proxy in front of the app, just listen
-                          // on the configured HTTP port
+                          // In a hosting environment like Bluemix for example,
+                          // HTTPS is handled by a reverse proxy in front
+                          // of the app, just listen on the configured
+                          // HTTP port
                           log('HTTP server listening on port %d', env.PORT);
                           http.createServer(app).listen(env.PORT, cb);
                         }
