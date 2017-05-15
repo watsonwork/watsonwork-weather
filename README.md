@@ -1,4 +1,4 @@
-# watsonwork-weather-intent-based
+# watsonwork-weather
 
 [![Build Status](https://travis-ci.org/watsonwork/watsonwork-weather.svg)](https://travis-ci.org/watsonwork/watsonwork-weather)
 
