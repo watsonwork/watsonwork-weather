@@ -1,16 +1,6 @@
 // A sample app that listens to messages posted to a space in IBM
 // Watson Workspace and implements actions that return the weather.
 
-/*
-
-export WEATHER_APP_ID=679ef41f-7533-40c2-84f9-eb0d30f02e99
-export WEATHER_APP_SECRET=8j8aej9a4pjmzgia30q0q6ai3stl3cyy
-export WEATHER_WEBHOOK_SECRET=5mq42xeycn8kbcfsauggqsmyxfw3knh3
-export WEATHER_TWC_USER=9d69c6ca-e4d2-4273-b715-c350337b26f7
-export WEATHER_TWC_PASSWORD=iTt1hAGQlH
-
-
-*/
 import express from 'express';
 import * as util from 'util';
 import * as bparser from 'body-parser';
@@ -48,7 +38,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
   res.status(201).end();
 
     // Handle messages identified as action requests
-    events.onIntent(req.body, appId, token,
+  events.onIntent(req.body, appId, token,
       (intent, focus, message, user) => {
 
         // Run with any previously saved action state
@@ -89,88 +79,58 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             }
 
             if(astate.intent === 'forecast') {
-              // Get a weather forecast
+                // Get a weather forecast
               twc.forecast5d(astate.city,
-                wuser, wpassword, (err, forecast) => {
-                  if(err) {
-                    send(weatherError());
-                    return;
-                  }
-                  if(!forecast.geo && forecast.geo.city) {
-                    // Tell the user that the given city couldn't be found
-                    send(cityNotFound(astate.city, user));
-                    return;
-                  }
+                  wuser, wpassword, (err, forecast) => {
+                    if(err) {
+                      send(weatherError());
+                      return;
+                    }
+                    if(!forecast.geo && forecast.geo.city) {
+                      // Tell the user that the given city couldn't be found
+                      send(cityNotFound(astate.city, user));
+                      return;
+                    }
 
-                  // Return weather forecast
-                  send(weatherForecast(forecast, user));
+                    // Return weather forecast
+                    send(weatherForecast(forecast, user));
 
-                  // Reset the weather action as it's now complete
-                  delete astate.intent;
-                  delete astate.city;
-                  cb(null, astate);
-                });
+                    // Reset the weather action as it's now complete
+                    delete astate.intent;
+                    delete astate.city;
+                    cb(null, astate);
+                  });
               return;
             }
           }
 
-          // Cancel the action
+              // Cancel the action
           if((astate.intent === 'weather' ||
-            astate.intent === 'forecast') &&
-            intent === 'negation') {
+              astate.intent === 'forecast') &&
+              intent === 'negation') {
             send(noProblem(user));
 
-            // Forget the weather action and city as that was not what the
-            // user wanted
+                // Forget the weather action and city as that was not what the
+                // user wanted
             delete astate.intent;
             delete astate.city;
             cb(null, astate);
           }
 
-          // Look for a city in the request, default to last city used
+              // Look for a city in the request, default to last city used
           const city =
-            cityAndState(focus.extractedInfo.entities) || astate.city;
+              cityAndState(focus.extractedInfo.entities) || astate.city;
 
           if(city) {
-            // Remember the city
+                // Remember the city
             astate.city = city;
 
-            // Ask the user to confirm
+                // Ask the user to confirm
             if(intent === 'weather')
               send(confirmConditions(city, user));
 
             else if(intent == 'forecast')
               send(confirmForecast(city, user));
-          }
-          else
-            // Need a city, ask for it
-            send(whichCity(user));
-
-          // Return the new action state
-          cb(null, astate);
-        });
-      });
-
-    // Handle mentions of entities in messages
-    events.onEntities(req.body, appId, token,
-      (entities, nlp, message, user) => {
-
-              // Look for a city in the request, default to last city used
-          const city =
-              cityAndState(focus.extractedInfo.entities) || astate.city;
-
-          // set city
-          if (city) {
-                // Remember the city
-            astate.city = city;
-
-              // Ask for a confirmation to get the weather conditions or
-              // weather forecast in the recognized city
-              if(astate.intent === 'weather')
-                send(confirmConditions(city, user));
-
-              else if(astate.intent === 'forecast')
-                send(confirmForecast(city, user));
           }
           else
               // Need a city, ask for it
@@ -181,36 +141,35 @@ export const weather = (appId, store, wuser, wpassword, token) =>
         });
       });
 
+      // Handle mentions of entities in messages
+      events.onEntities(req.body, appId, token,
+        (entities, nlp, message, user) => {
 
-          // Handle mentions of entities in messages
-  events.onEntities(req.body, appId, token,
-            (entities, nlp, message, user) => {
+          // Run with any previously saved action state
+          state.run(spaceId, user.id, store, (astate, cb) => {
 
-              // Run with any previously saved action state
-              state.run(spaceId, user.id, store, (astate, cb) => {
+            // Look for a city and state in the extracted entities
+            const city = cityAndState(entities);
+            if(city) {
+              astate.city = city;
+              if(message.id !== astate.message.id)
 
-                // Look for a city and state in the extracted entities
-                const city = cityAndState(entities);
-                if (city) {
-                  astate.city = city;
-                  if (message.id !== astate.message.id)
+                // Ask for a confirmation to get the weather conditions or
+                // weather forecast in the recognized city
+                if(astate.intent === 'weather')
+                  send(confirmConditions(city, user));
 
-                  // Ask for a confirmation to get the weather conditions or
-                  // weather forecast in the recognized city
-                    if (astate.intent === 'weather')
-                      send(confirmConditions(city, user));
+                else if(astate.intent === 'forecast')
+                  send(confirmForecast(city, user));
+            }
 
-                    else if (astate.intent === 'forecast')
-                      send(confirmForecast(city, user));
-                }
+            // Return the new action state
+            cb(null, astate);
+          });
+        });
+    };
 
-                // Return the new action state
-                cb(null, astate);
-              });
-            });
-};
-
-          // Extract and combine city and state from a list of NL entities
+// Extract and combine city and state from a list of NL entities
 const cityAndState = (entities) => {
   const city =
             (entities.filter((e) => e.type === 'City')[0] || {}).text;
@@ -221,139 +180,138 @@ const cityAndState = (entities) => {
   return state ? [city, state].join(', ') : city;
 };
 
-          // The various messages the application sends
+// The various messages the application sends
 
-          // Weather conditions
+// Weather conditions
 const weatherConditions = (w, user) => ({
   title: 'Weather Conditions',
   text: util.format('%s\n%sF Feels like %sF\n%s%s',
-  [w.geo.city, w.geo.adminDistrictCode].join(', '),
-            w.observation.temp,
-            w.observation.feels_like,
-            w.observation.wx_phrase,
-            w.observation.terse_phrase ?
-            '. ' + w.observation.terse_phrase : ''),
+    [w.geo.city, w.geo.adminDistrictCode].join(', '),
+    w.observation.temp,
+    w.observation.feels_like,
+    w.observation.wx_phrase,
+    w.observation.terse_phrase ?
+      '. ' + w.observation.terse_phrase : ''),
   actor: 'The Weather Company'
 });
 
-          // Weather forecast
+// Weather forecast
 const weatherForecast = (w, user) => ({
   title: 'Weather Forecast',
-  text: util.format('%s%s', [w.geo.city, w.geo.adminDistrictCode].join(', '),
-            w.forecasts.reduce((a, f) => a +
-            util.format('\n%s %sF %sF %s',
-            f.dow.slice(0, 3),
-            f.max_temp || '--', f.min_temp || '--',
-            f.narrative.split('.')[0]),
-            '')),
+  text: util.format('%s%s',
+    [w.geo.city, w.geo.adminDistrictCode].join(', '),
+    w.forecasts.reduce((a, f) => a +
+      util.format('\n%s %sF %sF %s',
+        f.dow.slice(0, 3),
+        f.max_temp || '--', f.min_temp || '--',
+        f.narrative.split('.')[0]),
+      '')),
   actor: 'The Weather Company'
 });
 
-          // Ask for a confirmation to get the weather conditions
+// Ask for a confirmation to get the weather conditions
 const confirmConditions = (city, user) => ({
   text: util.format(
-              'Hey %s, I think you\'re looking for the weather conditions ' +
-              'in %s.\nIs that correct?', user.displayName, city)
+    'Hey %s, I think you\'re looking for the weather conditions ' +
+   'in %s.\nIs that correct?', user.displayName, city)
 });
 
-            // Ask for a confirmation to get a weather forecast
+// Ask for a confirmation to get a weather forecast
 const confirmForecast = (city, user) => ({
   text: util.format(
-                'Hey %s, I think you\'re looking for a weather forecast in %s.'
-                + '\nIs that correct?', user.displayName, city)
+    'Hey %s, I think you\'re looking for a weather forecast in %s.\n' +
+    'Is that correct?', user.displayName, city)
 });
 
-              // Ask which city to get weather for
+// Ask which city to get weather for
 const whichCity = (user) => ({
   text: util.format(
-  'Hey %s, I can get the weather for you but I need a city name.\nYou can ' +
-  'say San Francisco, or Littleton, MA for example.', user.displayName)
+    'Hey %s, I can get the weather for you but I need a city name.\nYou can ' +
+    'say San Francisco, or Littleton, MA for example.', user.displayName)
 });
 
-                // Ask to clarify a city that cannot be found
+// Ask to clarify a city that cannot be found
 const cityNotFound = (city, user) => ({
   text: util.format(
-                    'Hey %s, I couldn\'t find %s, I need a valid city.',
-                    user.displayName, city)
+    'Hey %s, I couldn\'t find %s, I need a valid city.',
+    user.displayName, city)
 });
 
-                  // Say OK
+// Say OK
 const noProblem = (user) => ({
   text: util.format('OK %s, no problem.', user.displayName)
 });
 
-                  // Create Express Web app
+// Create Express Web app
 export const webapp =
-                  (appId, secret, whsecret, store, wuser, wpassword, cb) => {
-                    // Authenticate the app and get an OAuth token
-                    oauth.run(appId, secret, (err, token) => {
-                      if (err) {
-                        cb(err);
-                        return;
-                      }
+  (appId, secret, whsecret, store, wuser, wpassword, cb) => {
+    // Authenticate the app and get an OAuth token
+    oauth.run(appId, secret, (err, token) => {
+      if(err) {
+        cb(err);
+        return;
+      }
 
-                      // Return the Express Web app
-                      cb(null, express()
+      // Return the Express Web app
+      cb(null, express()
 
-                      // Configure Express route for the app Webhook
-                      .post('/weather',
+        // Configure Express route for the app Webhook
+        .post('/weather',
 
-                      // Verify Watson Work request signature
-                      // and parse request body
-                      bparser.json({
-                        type: '*/*',
-                        verify: sign.verify(whsecret)
-                      }),
+          // Verify Watson Work request signature and parse request body
+          bparser.json({
+            type: '*/*',
+            verify: sign.verify(whsecret)
+          }),
 
-                      // Handle Watson Work Webhook challenge requests
-                      sign.challenge(whsecret),
+          // Handle Watson Work Webhook challenge requests
+          sign.challenge(whsecret),
 
-                      // Handle Watson Work Webhook events
-                      weather(appId, state.store(store),
-                      wuser, wpassword, token)));
-                    });
-                  };
+          // Handle Watson Work Webhook events
+          weather(appId, state.store(store), wuser, wpassword, token)));
+    });
+  };
 
-                  // App main entry point
+// App main entry point
 const main = (argv, env, cb) => {
-                    // Create Express Web app
+  // Create Express Web app
   webapp(
-                      env.WEATHER_APP_ID,
-                      env.WEATHER_APP_SECRET,
-                      env.WEATHER_WEBHOOK_SECRET,
-                      env.WEATHER_STORE,
-                      env.WEATHER_TWC_USER,
-                      env.WEATHER_TWC_PASSWORD, (err, app) => {
-                        if (err) {
-                          cb(err);
-                          return;
-                        }
+    env.WEATHER_APP_ID,
+    env.WEATHER_APP_SECRET,
+    env.WEATHER_WEBHOOK_SECRET,
+    env.WEATHER_STORE,
+    env.WEATHER_TWC_USER,
+    env.WEATHER_TWC_PASSWORD, (err, app) => {
+      if(err) {
+        cb(err);
+        return;
+      }
 
-                        if (env.PORT) {
-                          // In a hosting environment like Bluemix for example,
-                          // HTTPS is handled by a reverse proxy in front
-                          // of the app, just listen on the configured
-                          // HTTP port
-                          log('HTTP server listening on port %d', env.PORT);
-                          http.createServer(app).listen(env.PORT, cb);
-                        }
-                        else
-                        // Listen on the configured HTTPS port, default to 443
-                        ssl.conf(env, (err, conf) => {
-                          if (err) {
-                            cb(err);
-                            return;
-                          }
-                          const port = env.SSLPORT || 443;
-                          log('HTTPS server listening on port %d', port);
-                          https.createServer(conf, app).listen(port, cb);
-                        });
-                      });
+      if(env.PORT) {
+        // In a hosting environment like Bluemix for example, HTTPS is
+        // handled by a reverse proxy in front of the app, just listen
+        // on the configured HTTP port
+        log('HTTP server listening on port %d', env.PORT);
+        http.createServer(app).listen(env.PORT, cb);
+      }
+
+      else
+        // Listen on the configured HTTPS port, default to 443
+        ssl.conf(env, (err, conf) => {
+          if(err) {
+            cb(err);
+            return;
+          }
+          const port = env.SSLPORT || 443;
+          log('HTTPS server listening on port %d', port);
+          https.createServer(conf, app).listen(port, cb);
+        });
+    });
 };
 
 if (require.main === module)
   main(process.argv, process.env, (err) => {
-    if (err) {
+    if(err) {
       console.log('Error starting app:', err);
       return;
     }
