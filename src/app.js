@@ -125,12 +125,12 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             // Remember the city
             astate.city = city;
 
-              // Ask the user to confirm
-              if(intent === 'weather')
-                send(confirmConditions(city, user));
+            // Ask the user to confirm
+            if(intent === 'weather')
+              send(confirmConditions(city, user));
 
-              else if(intent == 'forecast')
-                send(confirmForecast(city, user));
+            else if(intent == 'forecast')
+              send(confirmForecast(city, user));
           }
           else
               // Need a city, ask for it
@@ -141,8 +141,8 @@ export const weather = (appId, store, wuser, wpassword, token) =>
         });
       });
 
-      // Handle mentions of entities in messages
-      events.onEntities(req.body, appId, token,
+    // Handle mentions of entities in messages
+    events.onEntities(req.body, appId, token,
         (entities, nlp, message, user) => {
 
           // Run with any previously saved action state
@@ -167,7 +167,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             cb(null, astate);
           });
         });
-};
+  };
 
 // Extract and combine city and state from a list of NL entities
 const cityAndState = (entities) => {
