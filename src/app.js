@@ -47,21 +47,23 @@ export const weather = (appId, store, wuser, wpassword, token) =>
     // be sent asynchronously
   res.status(201).end();
 
-    // Handle messages identified as intents identified
-  events.onIntent(req.body, appId, token,
-      (action, focus, message, user) => {
+    // Handle messages identified as action requests
+    events.onIntent(req.body, appId, token,
+      (intent, focus, message, user) => {
 
         // Run with any previously saved action state
         state.run(spaceId, user.id, store, (astate, cb) => {
+          // Remember the action being requested and the message that
+          // requested it
+          astate.message = message;
+          if(intent === 'weather' || intent === 'forecast')
+            astate.intent = intent;
 
-          // focus.lens is the current identified intent
-          // astate.intent is the previously stated intent prior to this current
-          // state frame
+          // Proceed with the action and send the weather conditions or a
+          // weather forecast
+          if(intent === 'confirmation' && astate.city) {
 
-          // User confirms, and has already set a city of interest
-          if (focus.lens === 'confirmation' && astate.city) {
-            // User has previously stated interest in the weather
-            if (astate.intent === 'weather') {
+            if(astate.intent === 'weather') {
               // Get the weather conditions
               twc.conditions(astate.city,
                 wuser, wpassword, (err, conditions) => {
@@ -78,56 +80,80 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                   // Return the weather conditions
                   send(weatherConditions(conditions, user));
 
-                  // Reset the weather intent as it's now complete
+                  // Reset the weather action as it's now complete
                   delete astate.intent;
                   delete astate.city;
                   cb(null, astate);
                 });
               return;
             }
-            // User has previously stated interest in the forecast
-            if (astate.intent === 'forecast') {
-                // Get a weather forecast
+
+            if(astate.intent === 'forecast') {
+              // Get a weather forecast
               twc.forecast5d(astate.city,
-                  wuser, wpassword, (err, forecast) => {
-                    if (err) {
-                      send(weatherError());
-                      return;
-                    }
-                    if (!forecast.geo && forecast.geo.city) {
-                      // Tell the user that the given city couldn't be found
-                      send(cityNotFound(astate.city, user));
-                      return;
-                    }
+                wuser, wpassword, (err, forecast) => {
+                  if(err) {
+                    send(weatherError());
+                    return;
+                  }
+                  if(!forecast.geo && forecast.geo.city) {
+                    // Tell the user that the given city couldn't be found
+                    send(cityNotFound(astate.city, user));
+                    return;
+                  }
 
-                    // Return weather forecast
-                    send(weatherForecast(forecast, user));
+                  // Return weather forecast
+                  send(weatherForecast(forecast, user));
 
-                    // Reset the weather action as it's now complete
-                    delete astate.intent;
-                    delete astate.city;
-                    cb(null, astate);
-                  });
+                  // Reset the weather action as it's now complete
+                  delete astate.intent;
+                  delete astate.city;
+                  cb(null, astate);
+                });
               return;
             }
           }
 
-              // Cancel the action
-          if ((astate.intent === 'weather' ||
-              astate.intent === 'forecast') &&
-              focus.lens === 'negation') {
+          // Cancel the action
+          if((astate.intent === 'weather' ||
+            astate.intent === 'forecast') &&
+            intent === 'negation') {
             send(noProblem(user));
 
-                // Forget the weather action and city as that was not what the
-                // user wanted
-            delete astate.action;
+            // Forget the weather action and city as that was not what the
+            // user wanted
+            delete astate.intent;
             delete astate.city;
             cb(null, astate);
           }
-              // Remember the action being requested and the message that
-              // requested it
-          astate.message = message;
-          astate.intent = focus.lens;
+
+          // Look for a city in the request, default to last city used
+          const city =
+            cityAndState(focus.extractedInfo.entities) || astate.city;
+
+          if(city) {
+            // Remember the city
+            astate.city = city;
+
+            // Ask the user to confirm
+            if(intent === 'weather')
+              send(confirmConditions(city, user));
+
+            else if(intent == 'forecast')
+              send(confirmForecast(city, user));
+          }
+          else
+            // Need a city, ask for it
+            send(whichCity(user));
+
+          // Return the new action state
+          cb(null, astate);
+        });
+      });
+
+    // Handle mentions of entities in messages
+    events.onEntities(req.body, appId, token,
+      (entities, nlp, message, user) => {
 
               // Look for a city in the request, default to last city used
           const city =
@@ -138,12 +164,13 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                 // Remember the city
             astate.city = city;
 
-            // Ask the user to confirm
-            if (focus.lens === 'weather')
-              send(confirmConditions(city, user));
+              // Ask for a confirmation to get the weather conditions or
+              // weather forecast in the recognized city
+              if(astate.intent === 'weather')
+                send(confirmConditions(city, user));
 
-            else if (focus.lens === 'forecast')
-              send(confirmForecast(city, user));
+              else if(astate.intent === 'forecast')
+                send(confirmForecast(city, user));
           }
           else
               // Need a city, ask for it

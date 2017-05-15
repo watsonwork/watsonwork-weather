@@ -28,10 +28,8 @@ const callback = (evt, appId, info, annotation, token, cb) => {
   });
 };
 
-// Return the action identified in an annotation event
+// Return the intent identified in an annotation event
 export const onIntent = (evt, appId, token, cb) => {
-  // log('Annotation event!');
-  log(evt);
   // Check for a focus annotation
   if(evt.type === 'message-annotation-added' &&
     evt.annotationType === 'message-focus') {
