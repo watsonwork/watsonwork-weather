@@ -37,8 +37,8 @@ export const weather = (appId, store, wuser, wpassword, token) =>
     // be sent asynchronously
   res.status(201).end();
 
-    // Handle messages identified as action requests
-  events.onIntent(req.body, appId, token,
+    // Handle messages identified as intent requests
+    events.onIntent(req.body, appId, token,
       (intent, focus, message, user) => {
 
         // Run with any previously saved action state
@@ -79,53 +79,53 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             }
 
             if(astate.intent === 'forecast') {
-                // Get a weather forecast
+              // Get a weather forecast
               twc.forecast5d(astate.city,
-                  wuser, wpassword, (err, forecast) => {
-                    if(err) {
-                      send(weatherError());
-                      return;
-                    }
-                    if(!forecast.geo && forecast.geo.city) {
-                      // Tell the user that the given city couldn't be found
-                      send(cityNotFound(astate.city, user));
-                      return;
-                    }
+                wuser, wpassword, (err, forecast) => {
+                  if(err) {
+                    send(weatherError());
+                    return;
+                  }
+                  if(!forecast.geo && forecast.geo.city) {
+                    // Tell the user that the given city couldn't be found
+                    send(cityNotFound(astate.city, user));
+                    return;
+                  }
 
-                    // Return weather forecast
-                    send(weatherForecast(forecast, user));
+                  // Return weather forecast
+                  send(weatherForecast(forecast, user));
 
-                    // Reset the weather action as it's now complete
-                    delete astate.intent;
-                    delete astate.city;
-                    cb(null, astate);
-                  });
+                  // Reset the weather action as it's now complete
+                  delete astate.intent;
+                  delete astate.city;
+                  cb(null, astate);
+                });
               return;
             }
           }
 
-              // Cancel the action
+          // Cancel the action
           if((astate.intent === 'weather' ||
-              astate.intent === 'forecast') &&
-              intent === 'negation') {
+            astate.intent === 'forecast') &&
+            intent === 'negation') {
             send(noProblem(user));
 
-                // Forget the weather action and city as that was not what the
-                // user wanted
+            // Forget the weather action and city as that was not what the
+            // user wanted
             delete astate.intent;
             delete astate.city;
             cb(null, astate);
           }
 
-              // Look for a city in the request, default to last city used
+          // Look for a city in the request, default to last city used
           const city =
-              cityAndState(focus.extractedInfo.entities) || astate.city;
+            cityAndState(focus.extractedInfo.entities) || astate.city;
 
           if(city) {
-                // Remember the city
+            // Remember the city
             astate.city = city;
 
-                // Ask the user to confirm
+            // Ask the user to confirm
             if(intent === 'weather')
               send(confirmConditions(city, user));
 
@@ -167,7 +167,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             cb(null, astate);
           });
         });
-    };
+};
 
 // Extract and combine city and state from a list of NL entities
 const cityAndState = (entities) => {

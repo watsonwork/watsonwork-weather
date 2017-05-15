@@ -13,7 +13,7 @@ const callback = (evt, appId, info, annotation, token, cb) => {
 
     // Retrieve the annotated message
   messages.message(evt.messageId, token(), (err, message) => {
-    if (err)
+    if(err)
       return;
 
         // Ignore messages from the app itself
