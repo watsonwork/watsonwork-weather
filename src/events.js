@@ -28,8 +28,8 @@ const callback = (evt, appId, info, annotation, token, cb) => {
   });
 };
 
-// Return the action identified in an annotation event
-export const onAction = (evt, appId, token, cb) => {
+// Return the intent identified in an annotation event
+export const onIntent = (evt, appId, token, cb) => {
   // Check for a focus annotation
   if(evt.type === 'message-annotation-added' &&
     evt.annotationType === 'message-focus') {
@@ -37,33 +37,16 @@ export const onAction = (evt, appId, token, cb) => {
     // Call back with any action found on the focus annotation
     const focus = JSON.parse(evt.annotationPayload);
     if(focus.applicationId === appId) {
-      const action = focus.actions && focus.actions[0];
-      if(action) {
-        log('Idenfified action %s', action);
-        callback(evt, appId, action, focus, token, cb);
+      // const action = focus.actions && focus.actions[0];
+      const intent = focus.lens;
+      if(intent) {
+        log('Idenfified intent %s', intent);
+        callback(evt, appId, intent, focus, token, cb);
       }
     }
   }
 };
 
-// Return the next step in an action, determined from a user input
-export const onActionNextStep = (evt, appId, token, cb) => {
-  // Check for a focus annotation
-  if(evt.type === 'message-annotation-added' &&
-    evt.annotationType === 'message-focus') {
-
-    // Call back with any action next step found on the focus annotation
-    const focus = JSON.parse(evt.annotationPayload);
-    if(focus.applicationId === appId) {
-      const payload = JSON.parse(focus.payload);
-      const next = (payload.actionNextSteps || [])[0];
-      if(next) {
-        log('Idenfified action next step %s', next);
-        callback(evt, appId, next, focus, token, cb);
-      }
-    }
-  }
-};
 
 // Return the entities recognized in an annotation event
 export const onEntities = (evt, appId, token, cb) => {
@@ -79,4 +62,3 @@ export const onEntities = (evt, appId, token, cb) => {
     }
   }
 };
-

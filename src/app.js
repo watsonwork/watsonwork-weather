@@ -38,8 +38,8 @@ export const weather = (appId, store, wuser, wpassword, token) =>
     res.status(201).end();
 
     // Handle messages identified as action requests
-    events.onAction(req.body, appId, token,
-      (action, focus, message, user) => {
+    events.onIntent(req.body, appId, token,
+      (intent, focus, message, user) => {
 
         // Run with any previously saved action state
         state.run(spaceId, user.id, store, (astate, cb) => {
@@ -47,44 +47,14 @@ export const weather = (appId, store, wuser, wpassword, token) =>
           // Remember the action being requested and the message that
           // requested it
           astate.message = message;
-          astate.action = action;
-
-          // Look for a city in the request, default to last city used
-          const city =
-            cityAndState(focus.extractedInfo.entities) || astate.city;
-
-          if(city) {
-            // Remember the city
-            astate.city = city;
-
-            // Ask the user to confirm
-            if(action === 'Get_Weather_Conditions')
-              send(confirmConditions(city, user));
-
-            else if(action === 'Get_Weather_Forecast')
-              send(confirmForecast(city, user));
-          }
-          else
-            // Need a city, ask for it
-            send(whichCity(user));
-
-          // Return the new action state
-          cb(null, astate);
-        });
-      });
-
-    // Handle steps within an action, determined from user input
-    events.onActionNextStep(req.body, appId, token,
-      (next, focus, message, user) => {
-
-        // Run with any previously saved action state
-        state.run(spaceId, user.id, store, (astate, cb) => {
+          if(intent === 'weather' || intent === 'forecast')
+            astate.intent = intent;
 
           // Proceed with the action and send the weather conditions or a
           // weather forecast
-          if(next === 'Proceed' && astate.city) {
+          if(intent === 'confirmation' && astate.city) {
 
-            if(astate.action === 'Get_Weather_Conditions') {
+            if(astate.intent === 'weather') {
               // Get the weather conditions
               twc.conditions(astate.city,
                 wuser, wpassword, (err, conditions) => {
@@ -102,14 +72,14 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                   send(weatherConditions(conditions, user));
 
                   // Reset the weather action as it's now complete
-                  delete astate.action;
+                  delete astate.intent;
                   delete astate.city;
                   cb(null, astate);
                 });
               return;
             }
 
-            if(astate.action === 'Get_Weather_Forecast') {
+            if(astate.intent === 'forecast') {
               // Get a weather forecast
               twc.forecast5d(astate.city,
                 wuser, wpassword, (err, forecast) => {
@@ -127,7 +97,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
                   send(weatherForecast(forecast, user));
 
                   // Reset the weather action as it's now complete
-                  delete astate.action;
+                  delete astate.intent;
                   delete astate.city;
                   cb(null, astate);
                 });
@@ -136,17 +106,39 @@ export const weather = (appId, store, wuser, wpassword, token) =>
           }
 
           // Cancel the action
-          if((astate.action === 'Get_Weather_Conditions' ||
-            astate.action === 'Get_Weather_Forecast') &&
-            next === 'Cancel') {
+          if((astate.intent === 'weather' ||
+            astate.intent === 'forecast') &&
+            intent === 'negation') {
             send(noProblem(user));
 
             // Forget the weather action and city as that was not what the
             // user wanted
-            delete astate.action;
+            delete astate.intent;
             delete astate.city;
             cb(null, astate);
           }
+
+          // Look for a city in the request, default to last city used
+          const city =
+            cityAndState(focus.extractedInfo.entities) || astate.city;
+
+          if(city) {
+            // Remember the city
+            astate.city = city;
+
+            // Ask the user to confirm
+            if(intent === 'weather')
+              send(confirmConditions(city, user));
+
+            else if(intent == 'forecast')
+              send(confirmForecast(city, user));
+          }
+          else
+            // Need a city, ask for it
+            send(whichCity(user));
+
+          // Return the new action state
+          cb(null, astate);
         });
       });
 
@@ -165,10 +157,10 @@ export const weather = (appId, store, wuser, wpassword, token) =>
 
               // Ask for a confirmation to get the weather conditions or
               // weather forecast in the recognized city
-              if(astate.action === 'Get_Weather_Conditions')
+              if(astate.intent === 'weather')
                 send(confirmConditions(city, user));
 
-              else if(astate.action === 'Get_Weather_Forecast')
+              else if(astate.intent === 'forecast')
                 send(confirmForecast(city, user));
           }
 
@@ -326,4 +318,3 @@ if (require.main === module)
     }
     log('App started');
   });
-
