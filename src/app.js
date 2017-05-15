@@ -20,22 +20,22 @@ const log = debug('watsonwork-weather-app');
 
 // Handle events sent to the Weather action Webhook at /weather
 export const weather = (appId, store, wuser, wpassword, token) =>
-(req, res) => {
-  // log('Received body %o', req.body);
+  (req, res) => {
+    // log('Received body %o', req.body);
 
-  // Get the space containing the conversation that generated the event
-  const spaceId = req.body.spaceId;
+    // Get the space containing the conversation that generated the event
+    const spaceId = req.body.spaceId;
 
-  // A utility function that sends a message back to the conversation in
-  // that space
-  const send = (message) => {
-    messages.send(spaceId,
-      message.title, message.text, message.actor, token());
-  };
+    // A utility function that sends a message back to the conversation in
+    // that space
+    const send = (message) => {
+      messages.send(spaceId,
+        message.title, message.text, message.actor, token());
+    };
 
     // Respond to the Webhook right away, as any response messages will
     // be sent asynchronously
-  res.status(201).end();
+    res.status(201).end();
 
     // Handle messages identified as intent requests
     events.onIntent(req.body, appId, token,
@@ -57,11 +57,11 @@ export const weather = (appId, store, wuser, wpassword, token) =>
               // Get the weather conditions
               twc.conditions(astate.city,
                 wuser, wpassword, (err, conditions) => {
-                  if (err) {
+                  if(err) {
                     send(weatherError());
                     return;
                   }
-                  if (!conditions.geo && conditions.geo.city) {
+                  if(!conditions.geo && conditions.geo.city) {
                     // Tell the user that the given city couldn't be found
                     send(cityNotFound(astate.city, user));
                     return;
@@ -125,18 +125,18 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             // Remember the city
             astate.city = city;
 
-            // Ask the user to confirm
-            if(intent === 'weather')
-              send(confirmConditions(city, user));
+              // Ask the user to confirm
+              if(intent === 'weather')
+                send(confirmConditions(city, user));
 
-            else if(intent == 'forecast')
-              send(confirmForecast(city, user));
+              else if(intent == 'forecast')
+                send(confirmForecast(city, user));
           }
           else
               // Need a city, ask for it
               send(whichCity(user));
 
-              // Return the new action state
+          // Return the new action state
           cb(null, astate);
         });
       });
@@ -172,11 +172,11 @@ export const weather = (appId, store, wuser, wpassword, token) =>
 // Extract and combine city and state from a list of NL entities
 const cityAndState = (entities) => {
   const city =
-            (entities.filter((e) => e.type === 'City')[0] || {}).text;
-  if (!city)
+    (entities.filter((e) => e.type === 'City')[0] || {}).text;
+  if(!city)
     return undefined;
   const state =
-            (entities.filter((e) => e.type === 'StateOrCounty')[0] || {}).text;
+    (entities.filter((e) => e.type === 'StateOrCounty')[0] || {}).text;
   return state ? [city, state].join(', ') : city;
 };
 

@@ -11,19 +11,19 @@ const log = debug('watsonwork-weather-events');
 // event, the original annotated message and the user who sent it
 const callback = (evt, appId, info, annotation, token, cb) => {
 
-    // Retrieve the annotated message
+  // Retrieve the annotated message
   messages.message(evt.messageId, token(), (err, message) => {
     if(err)
       return;
 
-        // Ignore messages from the app itself
-    if (message.createdBy.id === appId)
+    // Ignore messages from the app itself
+    if(message.createdBy.id === appId)
       return;
 
-        // Return the extracted info, annotation, annotated message
-        // and the user who sent it
+    // Return the extracted info, annotation, annotated message
+    // and the user who sent it
     log('Message %s',
-          util.inspect(message, { colors: debug.useColors(), depth: 10 }));
+      util.inspect(message, { colors: debug.useColors(), depth: 10 }));
     cb(info, annotation, message, message.createdBy);
   });
 };
