@@ -37,7 +37,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
     // be sent asynchronously
     res.status(201).end();
 
-    // Handle messages identified as intent requests
+    // Handles identification of intents within a Watson Workspace message
     events.onIntent(req.body, appId, token,
       (intent, focus, message, user) => {
 
@@ -129,7 +129,7 @@ export const weather = (appId, store, wuser, wpassword, token) =>
             if(intent === 'weather')
               send(confirmConditions(city, user));
 
-            else if(intent == 'forecast')
+            else if(intent === 'forecast')
               send(confirmForecast(city, user));
           }
           else

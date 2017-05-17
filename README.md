@@ -259,7 +259,7 @@ named **Examples**, then open the **Apps** tab for that space and add the
 In the **Examples** space, say "*Is it raining in San Francisco?*".
 
 The Weather app will respond with a message asking you to confirm that you're
-interested in the weather in San Francisco:
+interested in the weather in San Francisco: 
 "*Hey [your name], I think you're looking for the weather conditions in
 San Francisco. Is that correct?*".
 
