@@ -63,4 +63,3 @@ export const query = (q, token, cb) => {
     cb(null, body);
   });
 };
-
