@@ -5,3 +5,4 @@ node_modules/**
 server.key
 server.crt
 tmp/**
+.DS_Store
